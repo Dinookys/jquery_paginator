@@ -1,10 +1,13 @@
+'use strict';
+
 (function($){
 	$.fn.extend({
 		paginator : function(args){
+			var self = this;
+			$(this).loadPaginator(args);			
 
-			$(this).loadPaginator(args);
-			$(this).on('click','a', function(e){				
-				$(this).parents('ul').loadPaginator(args);
+			$(window).bind('hashchange', function(){
+				self.loadPaginator(args);
 			});
 
 		},
@@ -21,47 +24,43 @@
 			if(totalPages == 0){
 				return false;
 			}
+			
+			current =  Number(window.location.hash.replace(basePath,'') || 1);
 
-			setTimeout(function(){
-				current =  Number(window.location.hash.replace(basePath,'') || 1);
+			self.children().remove();
 
-				self.children().remove();
+			if(current == 1){
+				self.append('<li><span>'+ first +'</span></li>');
+			}else{					
+				self.append('<li><a href="'+basePath+'1">'+ first +'</a></li>');
+			}
 
-				if(current == 1){
-					self.append('<li><span>'+ first +'</span></li>');
-				}else{					
-					self.append('<li><a href="'+basePath+'1">'+ first +'</a></li>');
-				}
+			if(current == totalPages || current >= totalPages - linksCount || current > linksCount){
+				self.append('<li><span>...</span></li>');
+			}
 
-				if(current == totalPages || current >= totalPages - linksCount || current > linksCount){
-					self.append('<li><span>...</span></li>');
-				}
+			for(var i=1; i <= totalPages; i++)	{
 
-				for(var i=1; i <= totalPages; i++)	{
-
-					if(i >= current - linksCount && i <= current || i <= linksCount + current && i > current - linksCount){
-					
-						if(i == current){
-							self.append('<li><span>'+i+'</span></li>');	
-						}else{
-							self.append('<li><a href="'+basePath+i+'">'+ i +'</a></li>');									
-						}
-
-					}
-				}
-
-				if(current != totalPages || current <= totalPages - linksCount){
-					self.append('<li><span>...</span></li>');
-				}
+				if(i >= current - linksCount && i <= current || i <= linksCount + current && i > current - linksCount){
 				
-				if(current == totalPages){
-					self.append('<li><span>'+ last +'</span></li>');
-				}else{					
-					self.append('<li><a href="'+basePath+totalPages+'">'+ last +'</a></li>');
+					if(i == current){
+						self.append('<li><span>'+i+'</span></li>');	
+					}else{
+						self.append('<li><a href="'+basePath+i+'">'+ i +'</a></li>');									
+					}
+
 				}
+			}
 
-			},10);
-
+			if(current != totalPages || current <= totalPages - linksCount){
+				self.append('<li><span>...</span></li>');
+			}
+			
+			if(current == totalPages){
+				self.append('<li><span>'+ last +'</span></li>');
+			}else{					
+				self.append('<li><a href="'+basePath+totalPages+'">'+ last +'</a></li>');
+			}
 		}
 
 	});
